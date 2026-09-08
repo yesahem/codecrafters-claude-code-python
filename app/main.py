@@ -50,9 +50,9 @@ def main():
     print("Logs from your program will appear here!", file=sys.stderr)
 
     # TODO: Uncomment the following line to pass the first stage
-    print(chat.choices[0].message.tool_calls[0].function.name)
+    # print(chat.choices[0].message.tool_calls[0].function.name)
     argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
-    print(open(argument["file_path"].replace("Read\n", "").strip()).read())
+    print(open(argument["file_path"].replace("Read\n", "").strip(), "r").read())
 
 
 if __name__ == "__main__":
