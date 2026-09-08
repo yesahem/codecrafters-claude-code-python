@@ -55,13 +55,13 @@ def main():
 
     tool_call_present = chat.choices[0].message.tool_calls
     print("Messages: c", messages)
-    while tool_call_present:
-        argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
+    for tool_call in tool_call_present:
+        argument = json.loads(tool_call.function.arguments)
         messages.append(
             {
                 "role": "tool",
                 "content": open(argument["file_path"]).read(),
-                "tool_call_id": chat.choices[0].message.tool_calls[0].id,
+                "tool_call_id": tool_call.id,
             }
         )
         chat = client.chat.completions.create(
