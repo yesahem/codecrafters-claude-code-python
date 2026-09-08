@@ -48,6 +48,23 @@ tools = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "Bash",
+            "description": "Execute a shell command",
+            "parameters": {
+                "type": "object",
+                "required": ["command"],
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The command to execute",
+                    }
+                },
+            },
+        },
+    },
 ]
 
 
@@ -92,8 +109,8 @@ def main():
                         "tool_call_id": tool_call.id,
                     }
                 )
-        
-            if tool_call.function.name == "Write":
+
+            elif tool_call.function.name == "Write":
                 arguments = json.loads(tool_call.function.arguments)
                 file_path = arguments["file_path"]
                 content = arguments["content"]
@@ -107,7 +124,18 @@ def main():
                         "tool_call_id": tool_call.id,
                     }
                 )
-
+            elif tool_call.function.name == "Bash":
+                arguments = json.loads(tool_call.function.arguments)
+                command = arguments["command"]
+                output = subprocess.run(command, shell=True, capture_output=True, text=True)
+                print("Command output: ", output.stdout)
+                messages.append(
+                    {
+                        "role": "tool",
+                        "content": output.stdout,
+                        "tool_call_id": tool_call.id,
+                    }
+                )
 
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
