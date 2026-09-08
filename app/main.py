@@ -14,6 +14,7 @@ def main():
     p.add_argument("-p", required=True)
     args = p.parse_args()
 
+    messages = [{"role": "user", "content": args.p}]
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
 
@@ -21,7 +22,7 @@ def main():
 
     chat = client.chat.completions.create(
         model="anthropic/claude-haiku-4.5",
-        messages=[{"role": "user", "content": args.p}],
+        messages=messages,
         tools=[
             {
                 "type": "function",
@@ -52,14 +53,19 @@ def main():
     # TODO: Uncomment the following line to pass the first stage
     # print(chat.choices[0].message.tool_calls[0].function.name)
 
-    tool_call_present = chat.choices[0].message.tool_calls
 
-    if tool_call_present:
+    tool_call_present = chat.choices[0].message.tool_calls
+    while tool_call_present:
         argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
-        print(open(argument["file_path"]).read())
-    else:
+        messages.append({"role": "tool", "content": open(argument["file_path"]).read()})
+        chat = client.chat.completions.create(
+            model="anthropic/claude-haiku-4.5",
+            messages=messages,
+        )
+        tool_call_present = chat.choices[0].message.tool_calls
         print(chat.choices[0].message.content)
 
+    print(chat.choices[0].message.content)
 
 if __name__ == "__main__":
     main()
