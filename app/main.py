@@ -91,6 +91,9 @@ def main():
                         "tool_call_id": tool_call.id,
                     }
                 )
+            else:
+                raise RuntimeError("unknown tool call: ", tool_call.function.name)
+
             if tool_call.function.name == "Write":
                 arguments = json.loads(tool_call.function.arguments)
                 file_path = arguments["file_path"]
@@ -106,7 +109,7 @@ def main():
                     }
                 )
             else:
-                raise RuntimeError("unknown tool call: ", tool_call.id)
+                raise RuntimeError("unknown tool call: ", tool_call.function.name)
 
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
