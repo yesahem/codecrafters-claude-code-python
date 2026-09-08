@@ -52,7 +52,7 @@ def main():
     # TODO: Uncomment the following line to pass the first stage
     print(chat.choices[0].message.tool_calls[0].function.name)
     argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
-    print(open(argument["file_path"]).read())
+    print(argument.read())
 
 
 if __name__ == "__main__":
