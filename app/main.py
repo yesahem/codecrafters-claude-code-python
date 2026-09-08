@@ -47,7 +47,7 @@ def main():
 
         assistant_message = chat.choices[0].message
 
-        if not assistant_message or len(assistant_message) == 0:
+        if not assistant_message :
             raise RuntimeError("no choices in response")
 
         messages.append(assistant_message)
