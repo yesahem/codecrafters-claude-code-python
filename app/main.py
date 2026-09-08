@@ -53,38 +53,44 @@ def main():
     # TODO: Uncomment the following line to pass the first stage
     # print(chat.choices[0].message.tool_calls[0].function.name)
 
-
     tool_call_present = chat.choices[0].message.tool_calls
     while tool_call_present:
         argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
-        messages.append({"role": "tool", "content": open(argument["file_path"]).read(), "tool_call_id": chat.choices[0].message.tool_calls[0].id})
+        messages.append(
+            {
+                "role": "tool",
+                "content": open(argument["file_path"]).read(),
+                "tool_call_id": chat.choices[0].message.tool_calls[0].id,
+            }
+        )
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
             messages=messages,
             tools=[
-            {
-                "type": "function",
-                "function": {
-                    "name": "Read",
-                    "description": "Read and return the contents of a file",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "The path to the file to read",
-                            }
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "Read",
+                        "description": "Read and return the contents of a file",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "file_path": {
+                                    "type": "string",
+                                    "description": "The path to the file to read",
+                                }
+                            },
+                            "required": ["file_path"],
                         },
-                        "required": ["file_path"],
                     },
-                },
-            }
-        ],
-            tool_choice="auto",
+                }
+            ],
+            # tool_choice="auto",
         )
         tool_call_present = chat.choices[0].message.tool_calls
-        print(chat.choices[0].message.content)
-    print(chat.choices[0].message.content)
+        print("tool call present: ", tool_call_present)
+        print("chat.choices[0].message.content: ", chat.choices[0].message.content)
+    print("final chat.choices[0].message.content: ", chat.choices[0].message.content)
 
 
 if __name__ == "__main__":
