@@ -67,6 +67,7 @@ def main():
             model="anthropic/claude-haiku-4.5",
             messages=messages,
             tools=tools,
+            tool_choice="auto",
         )
 
         assistant_message = chat.choices[0].message
