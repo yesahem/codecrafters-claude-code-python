@@ -57,15 +57,15 @@ def main():
     tool_call_present = chat.choices[0].message.tool_calls
     while tool_call_present:
         argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
-        messages.append({"role": "tool", "content": open(argument["file_path"]).read()})
+        messages.append({"role": "tool", "content": open(argument["file_path"]).read(), "tool_call_id": chat.choices[0].message.tool_calls[0].id})
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
             messages=messages,
         )
         tool_call_present = chat.choices[0].message.tool_calls
         print(chat.choices[0].message.content)
-
     print(chat.choices[0].message.content)
+
 
 if __name__ == "__main__":
     main()
