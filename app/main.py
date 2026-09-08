@@ -102,13 +102,13 @@ def main():
                 with open(file_path, "w") as f:
                     f.write(content)
                 print("File written successfully")
-                messages.append(
-                    {
-                        "role": "tool",
-                        "content": content,
-                        "tool_call_id": tool_call.id,
-                    }
-                )
+                # messages.append(
+                #     {
+                #         "role": "tool",
+                #         "content": content,
+                #         "tool_call_id": tool_call.id,
+                #     }
+                # )
             else:
                 raise RuntimeError("unknown tool call: ", tool_call.function.name)
 
