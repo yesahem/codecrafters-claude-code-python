@@ -20,50 +20,7 @@ def main():
 
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
-    chat = client.chat.completions.create(
-        model="anthropic/claude-haiku-4.5",
-        messages=messages,
-        tools=[
-            {
-                "type": "function",
-                "function": {
-                    "name": "Read",
-                    "description": "Read and return the contents of a file",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "The path to the file to read",
-                            }
-                        },
-                        "required": ["file_path"],
-                    },
-                },
-            }
-        ],
-    )
-
-    if not chat.choices or len(chat.choices) == 0:
-        raise RuntimeError("no choices in response")
-
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!", file=sys.stderr)
-
-    # TODO: Uncomment the following line to pass the first stage
-    # print(chat.choices[0].message.tool_calls[0].function.name)
-
-    tool_call_present = chat.choices[0].message.tool_calls
-    print("Messages: c", messages)
-    for tool_call in tool_call_present:
-        argument = json.loads(tool_call.function.arguments)
-        messages.append(
-            {
-                "role": "tool",
-                "content": open(argument["file_path"]).read(),
-                "tool_call_id": tool_call.id,
-            }
-        )
+    while True:
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
             messages=messages,
@@ -86,12 +43,49 @@ def main():
                     },
                 }
             ],
-            # tool_choice="auto",
         )
-    tool_call_present = chat.choices[0].message.tool_calls
-    print("tool call present: ", tool_call_present)
-    print("chat.choices[0].message.content: ", chat.choices[0].message.content)
-    print("final chat.choices[0].message.content: ", chat.choices[0].message.content)
+
+        assistant_message = chat.choices[0].message
+
+        if not assistant_message or len(assistant_message) == 0:
+            raise RuntimeError("no choices in response")
+
+        messages.append(assistant_message)
+
+        if not assistant_message.tool_calls:
+            print(assistant_message.content)
+            break
+
+        for tool_call in assistant_message.tool_calls:
+            if tool_call.function.name == "Read":
+                arguments = json.loads(tool_call.function.arguments)
+                file_path = arguments["file_path"]
+                messages.append(
+                    {
+                        "role": "tool",
+                        "content": open(file_path).read(),
+                        "tool_call_id": tool_call.id,
+                    }
+                )
+            else:
+                raise RuntimeError("unknown tool call: ", tool_call.id)
+
+    # You can use print statements as follows for debugging, they'll be visible when running tests.
+    print("Logs from your program will appear here!", file=sys.stderr)
+
+    # TODO: Uncomment the following line to pass the first stage
+    # print(chat.choices[0].message.tool_calls[0].function.name)
+
+    # tool_call_present = chat.choices[0].message.tool_calls
+    # print("Messages: c", messages)
+
+    #     messages.append(
+    #         chat.choices[0].message
+    #     )
+    #     tool_call_present = chat.choices[0].message.tool_calls
+    # print("tool call present: ", tool_call_present)
+    # print("chat.choices[0].message.content: ", chat.choices[0].message.content)
+    # print("final chat.choices[0].message.content: ", chat.choices[0].message.content)
 
 
 if __name__ == "__main__":
