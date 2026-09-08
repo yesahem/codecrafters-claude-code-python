@@ -54,6 +54,7 @@ def main():
     # print(chat.choices[0].message.tool_calls[0].function.name)
 
     tool_call_present = chat.choices[0].message.tool_calls
+    print("Messages: c", messages)
     while tool_call_present:
         argument = json.loads(chat.choices[0].message.tool_calls[0].function.arguments)
         messages.append(
