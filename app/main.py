@@ -88,9 +88,9 @@ def main():
             ],
             # tool_choice="auto",
         )
-        tool_call_present = chat.choices[0].message.tool_calls
-        print("tool call present: ", tool_call_present)
-        print("chat.choices[0].message.content: ", chat.choices[0].message.content)
+    tool_call_present = chat.choices[0].message.tool_calls
+    print("tool call present: ", tool_call_present)
+    print("chat.choices[0].message.content: ", chat.choices[0].message.content)
     print("final chat.choices[0].message.content: ", chat.choices[0].message.content)
 
 
