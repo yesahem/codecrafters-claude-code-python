@@ -1,34 +1,72 @@
+# LLM Coding Agent with Tool Calling (Claude Code Clone)
+
 [![progress-banner](https://backend.codecrafters.io/progress/claude-code/3910deae-0e74-4f1e-8e52-d3ba441714a4)](https://app.codecrafters.io/users/yesahem?r=2qF)
 
-This is a starting point for Python solutions to the
-["Build Your own Claude Code" Challenge](https://codecrafters.io/challenges/claude-code).
+A CLI coding agent that sends prompts to **Claude Haiku** through **OpenRouter**'s OpenAI-compatible API, then uses **function calling** and a multi-turn **agent loop** to read files, write edits, and run shell commands until the task is done.
 
-Claude Code is an AI coding assistant that uses Large Language Models (LLMs) to
-understand code and perform actions through tool calls. In this challenge,
-you'll build your own Claude Code from scratch by implementing an LLM-powered
-coding assistant.
+Built for the [CodeCrafters "Build Your Own Claude Code"](https://codecrafters.io/challenges/claude-code) challenge. All 6 stages are complete.
 
-Along the way you'll learn about HTTP RESTful APIs, OpenAI-compatible tool
-calling, agent loop, and how to integrate multiple tools into an AI assistant.
+## What it does
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- Routes a `-p` prompt to Claude via OpenRouter (`chat.completions`)
+- Advertises three JSON Schema tools: **Read**, **Write**, and **Bash**
+- Runs an agent loop: call the model → execute tool calls → append results → repeat until a final text answer
+- Uses local filesystem I/O and `subprocess` so the model can inspect code, apply edits, and run commands
 
-# Passing the first stage
+## How the agent loop works
 
-The entry point for your `claude-code` implementation is in `app/main.py`. Study
-and uncomment the relevant code, and submit to pass the first stage:
+1. Send the user prompt plus tool definitions to the model (`tool_choice=auto`).
+2. If the model returns tool calls, execute each one and append a `role: tool` message.
+3. Call the model again with the updated conversation history.
+4. Stop when the model returns a normal assistant message (no tool calls) and print that answer.
 
-```sh
-codecrafters submit
+```
+User prompt
+    ↓
+Claude (OpenRouter / OpenAI-compatible API)
+    ↓
+tool calls? ──yes──► Read / Write / Bash ──► append tool results ──┐
+    │ no                                                          │
+    ↓                                                             │
+print final answer ◄──────────────────────────────────────────────┘
 ```
 
-# Stage 2 & beyond
+## Tools
 
-Note: This section is for stages 2 and beyond.
+| Tool | Purpose | Arguments |
+| --- | --- | --- |
+| `Read` | Return the contents of a file | `file_path` |
+| `Write` | Create or overwrite a file | `file_path`, `content` |
+| `Bash` | Run a shell command and capture stdout | `command` |
 
-1. Ensure you have `uv` installed locally.
-2. Run `./your_program.sh` to run your program, which is implemented in
-   `app/main.py`.
-3. Run `codecrafters submit` to submit your solution to CodeCrafters. Test
-   output will be streamed to your terminal.
+## Technologies
+
+Python · OpenAI Python SDK · OpenRouter · Claude Haiku · Function / Tool Calling · JSON Schema · Agent Loop · argparse · subprocess · uv
+
+## Setup
+
+1. Install [uv](https://docs.astral.sh/uv/).
+2. Set your OpenRouter credentials:
+
+```sh
+export OPENROUTER_API_KEY="your-key"
+# optional; defaults to https://openrouter.ai/api/v1
+export OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
+```
+
+3. Run a prompt:
+
+```sh
+./your_program.sh -p "Read README.md and summarize it"
+```
+
+The entry point is `app/main.py`.
+
+## Challenge stages
+
+1. Communicate with the LLM
+2. Advertise the Read tool
+3. Execute the Read tool
+4. Implement the agent loop
+5. Implement the Write tool
+6. Implement the Bash tool
